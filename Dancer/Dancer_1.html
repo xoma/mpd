@@ -1,0 +1,126 @@
+<h4>Введение</h4>
+В одной из <a href="http://allframeworks.ru/blog/mojo/167.html">прошлых заметок</a> я коротко описал <b>Mojolicious::Lite</b> - микро веб-фреймворк на <b>Perl</b>. Сегодня хочу начать рассказ о еще одном микро фреймоврке и тоже на Perl. Речь идет о <a href="http://www.perldancer.org/">Dancer</a>. <b>Dancer</b> был создан под впечатлениями от <a href="http://www.sinatrarb.com/">Sinatra</a> (микро веб-фрейморк на <b>Ruby</b>) и заимствует многие его возможности и идеи. <b>Dancer</b> активно развивается, регулярно выходят новые версии и появляются новые плагины.
+
+Официальный сайт - http://www.perldancer.org/
+Исходный код     - https://github.com/sukria/Dancer
+Dancer на <b>CPAN</b>   - http://search.cpan.org/~sukria/Dancer-1.3060/
+Twitter - http://twitter.com/PerlDancer
+Заметки о Dancer от автора - http://www.sukria.net/fr/archives/tag/dancer/
+ 
+
+В своей сегодняшней заметке я расскажу как установить Dancer, как создать первое приложение, мы кратко рассмотрим структуру Dancer-приложения и в конце запустим наше приложение и посмотрим на результат его работы.
+
+Дальше будет больше, так что следите за новостями =)
+
+ 
+<h4>Установка</h4>
+Установить <b>Dancer</b>, как и любой другой Perl-модуль, можно несколькими способами, вот некоторые из них (работа этих команд проверялась в операционной системе Ubuntu Linux):
+
+<blockquote>
+perl -MCPAN -e 'install Dancer'
+cpanm Dancer (используюя cpanminus)
+</blockquote>
+
+Установка проходит довольно быстро, зависимостей у фреймворка совсем немного.
+После того как <b>Dancer</b> установлен, можно приступать к созданию первого приложения. 
+Наличие вспомогательной утилиты/скрипта/команды для создания первоначальной структуры приложения стало уже стандартом для современных фреймворков на любых языках программирования. <b>Dancer</b> не исключение. Наше первое приложение назовем "Engine" (а уж, что этот "движок" будет делать - решайте сами =) ). Итак, для создания приложения выполним следующую команду:
+
+<blockquote>dancer -a Engine</blockquote>
+
+В результате чего получим вот такой вывод:
+
+<blockquote>+ Engine
++ Engine/bin
++ Engine/bin/app.pl
++ Engine/config.yml
++ Engine/environments
++ Engine/environments/development.yml
++ Engine/environments/production.yml
++ Engine/views
++ Engine/views/index.tt
++ Engine/views/layouts
++ Engine/views/layouts/main.tt
++ Engine/MANIFEST.SKIP
++ Engine/lib
+  Engine/lib/
++ Engine/lib/Engine.pm
++ Engine/public
++ Engine/public/css
++ Engine/public/css/style.css
++ Engine/public/css/error.css
++ Engine/public/images
++ Engine/public/500.html
++ Engine/public/404.html
++ Engine/public/dispatch.fcgi
++ Engine/public/dispatch.cgi
++ Engine/public/javascripts
++ Engine/public/javascripts/jquery.js
++ Engine/t
++ Engine/t/002_index_route.t
++ Engine/t/001_base.t
++ Engine/Makefile.PL
+</blockquote>
+
+Перейдем в каталог нашего новенького приложения и посмотрим, что мы получили.
+
+<img src="http://allframeworks.ru/uploads/images/00/00/01/2011/06/18/702ce9.jpg"  title="Структура Dancer приложения"  align="left"  alt="Структура Dancer приложения" />
+
+Как видно, у нас уже есть <b>jquery</b>! jQuery in the box!
+
+Каталог "<b>bin</b>" - содержит один единственный файл "app.pl", который предназначен для запуска нашего Dancer-приложения.Более подробно о нем мы поговорим немного позже. Особо нетерпеливые могу почитать справку, выполнив команду:
+
+<blockquote>
+./app.pl --help</blockquote>
+
+Файл "<b>config.yml</b>" - основной конфигурационный файл Dancer-приложения. Настройки хранятся в формате YAML (да, Кэп!). Данный файл считывается при старте приложения.
+
+Каталог "<b>enviroments</b>" - содержит конфигурационные файлы для различных вариантов работы приложения (developer, test, production и т.д.). Подробнее про это - в одной из следующих заметок.
+
+Каталог "<b>lib</b>" - сердце нашего Dancer-приложения, здесь "вся соль". Для нового приложения этот каталог содержит файл (Perl-модуль) с именем приложения (в нашем случае это модуль Engine.pm). В простейшем случае вся логика приложения будет содержаться именно в этом единственном файле. Содержание этого файла рассмотрим чуть позже.
+
+Файл "<b>Makefile.PL</b>" - файл стандартный для большинства Perl-модулей.
+
+Каталог "<b>public</b>" - предназначен для хранения статичных файлов, таких как css-файлы, js-файлы, картинки и прочее.
+
+Каталог "<b>t</b>" - содержит тесты для нашего приложения.
+
+Каталог "<b>views</b>" - содержит шаблоны нашего приложения (view в терминах MVC). Внутри имеется каталог "<b>layouts</b>", который содержит "общие" шаблоны.
+
+Вот мы совсем коротко и рассмотрели структуру нашего Dancer-приложения, пришло время посмотреть как оно работает. Сердцем приложения, как уже отмечалось, является каталог "lib", перейдем в него и откроем файл <b>Engine.pm</b>. Вот как он выглядит:
+
+<code>package Engine;
+use Dancer ':syntax';
+
+our $VERSION = '0.1';
+
+get '/' => sub {
+    template 'index';
+};
+
+true;</code>
+Всего 10 строк перлового кода, тем не менее, это работающие приложение, пусть и не делающее ничего полезного.
+
+Запустим его и посмотрим на результат работы. Для запуска приложения воспользуемся утилитой app.pl из каталога "bin" нашего приложения, выполним следующую команду:
+
+<blockquote>./bin/app.pl</blockquote>
+
+В результате получим приблизительно следующий вывод:
+
+
+<blockquote>[9956]  core @0.000012> loading Dancer::Handler::Standalone handler in /usr/local/share/perl/5.10.1/Dancer/Handler.pm l. 40
+[9956]  core @0.000214> loading handler 'Dancer::Handler::Standalone' in /usr/local/share/perl/5.10.1/Dancer.pm l. 352
+>> Dancer 1.3060 server 9956 listening on http://0.0.0.0:3000
+== Entering the development dance floor ...
+</blockquote>
+
+Тем самым мы запустили сервер разработки на котором выполняется наше приложение.
+
+Открыв браузер и перейдя по адресу http://localhost:3000/ увидим страницу приветсвия Dancer.
+
+<img src="http://allframeworks.ru/uploads/images/00/00/01/2011/06/18/4b2533.png"  title="Dancer страница приветствия"  alt="Dancer страница приветствия" />
+
+Поздравляю, Ваше первое <b>Perl-Dancer-приложение</b> создано и работает!
+
+В следующей заметке мы будет говорить о роутах, шаблонах и прочих интересных вещах!
+
+<b>use Perl && Dance</b>r;
