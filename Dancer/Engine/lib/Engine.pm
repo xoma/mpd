@@ -12,5 +12,4 @@ get '/about/' => sub {
     return 'Our cool Dancer application about page!';
 };
 
-
 true;
